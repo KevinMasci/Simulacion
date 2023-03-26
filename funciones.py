@@ -12,7 +12,6 @@ def valor_promedio(corrida):
     valor_prom_respecto_n = []
     for i, x in enumerate(corrida):
         valor_prom_respecto_n.append(np.mean(corrida[:i+1]))
-        #valor_prom_respecto_n.append(sum(corrida[:i+1])/len(corrida[:i+1]))
     return valor_prom_respecto_n
 
 def valor_varianza(corrida):
@@ -20,3 +19,15 @@ def valor_varianza(corrida):
     for i, x in enumerate(corrida):
         valor_varianza_respecto_n.append(np.var(corrida[:i+1]))
     return valor_varianza_respecto_n
+
+def valor_desvio(corrida):
+    valor_desvio_respecto_n = []
+    for i, x in enumerate(corrida):
+        valor_desvio_respecto_n.append(np.std(corrida[:i+1]))
+    return valor_desvio_respecto_n
+
+def contar(corrida):
+    cantidades = []
+    for x in range(38):
+        cantidades.append(corrida.count(x))
+    return cantidades
