@@ -14,6 +14,7 @@ prom_esperado = np.mean(corrida)
 varianza_esperada = np.var(corrida)
 desvio_esperado = np.std(corrida)
 
+#Graficos
 fr = frecuencia_relativa(corrida, elegido)
 plt.plot(l_tiradas, fr, label = "Frecuencia relativa respecto a n")
 plt.axhline(y = frec_esperada, color = 'r', linestyle = '-', label = "Frecuencia esperada")
@@ -46,8 +47,18 @@ plt.ylabel("Valor desvio")
 plt.legend()
 plt.show()
 
-#plt.hist(corrida, bins = "auto")
 cantidad = contar(corrida)
 numeros = list(range(38))
 plt.bar(numeros, cantidad)
+plt.show()
+
+fr1 = frecuencia_relativa(corrida, elegido)
+corrida2 = [random.randint(0,37) for i in range(tiradas)]
+fr2 = frecuencia_relativa(corrida2, elegido)
+plt.plot(l_tiradas, fr, label = "Frecuencia relativa 1 respecto a n")
+plt.plot(l_tiradas, fr2, label = "Frecuencia relativa 2 respecto a n")
+plt.axhline(y = frec_esperada, color = 'r', linestyle = '-', label = "Frecuencia esperada")
+plt.xlabel("Tiradas")
+plt.ylabel("Frecuencia relativa")
+plt.legend()
 plt.show()
