@@ -9,7 +9,8 @@ n = 1000  #Número de tiradas de la ruleta
 corrida = [np.random.randint(0,37) for i in range(n)]
 cant_corridas = 10
 
-caja_inicial = 50
+caja_acotada = 50
+caja_infinita = 10000
 apuesta_inicial = 1
 
 #Martingala
@@ -25,14 +26,14 @@ def ruleta(corrida, tipo_caja, estrategia):
         else: aciertos.append(0)
     for i, x in enumerate(aciertos):
         frec_relativa_aciertos.append(sum(aciertos[: i+1])/(i+1))
-        
+    
     #Flujo de caja
     apuesta = apuesta_inicial
     #Martingala
     if estrategia == "martingala":
         if tipo_caja == "infinita":
-            flujo_caja = [100000]
-            caja_actual = 100000
+            flujo_caja = [caja_infinita]
+            caja_actual = caja_infinita
             for x in aciertos:
                 if x == 1:
                     caja_actual += apuesta
@@ -44,7 +45,7 @@ def ruleta(corrida, tipo_caja, estrategia):
                     apuesta = apuesta*2
         else:
             flujo_caja = []
-            caja_actual = caja_inicial
+            caja_actual = caja_acotada
             for x in aciertos:
                 if x == 1:
                     caja_actual += apuesta
@@ -58,8 +59,8 @@ def ruleta(corrida, tipo_caja, estrategia):
     #Dalembert
     elif estrategia == "dalembert":
         if tipo_caja == "infinita":
-            flujo_caja = [10000]
-            caja_actual = 10000
+            flujo_caja = [caja_infinita]
+            caja_actual = caja_infinita
             for x in aciertos:
                 if x == 1:
                     caja_actual += apuesta
@@ -72,7 +73,7 @@ def ruleta(corrida, tipo_caja, estrategia):
                     apuesta = apuesta + 1
         else:
             flujo_caja = []
-            caja_actual = caja_inicial
+            caja_actual = caja_acotada
             for x in aciertos:
                 if x == 1:
                     caja_actual += apuesta
@@ -88,10 +89,10 @@ def ruleta(corrida, tipo_caja, estrategia):
     #Paroli
     else:
         victorias_consecutivas = 0
-        objetivo_victorias = 10
+        objetivo_victorias = 3
         if tipo_caja == "infinita":
-            flujo_caja = [10000]
-            caja_actual = 10000
+            flujo_caja = [caja_infinita]
+            caja_actual = caja_infinita
             for x in aciertos:
                 if x == 1:
                     victorias_consecutivas += 1
@@ -109,7 +110,7 @@ def ruleta(corrida, tipo_caja, estrategia):
                     victorias_consecutivas = 0
         else:
             flujo_caja = []
-            caja_actual = caja_inicial
+            caja_actual = caja_acotada
             for x in aciertos:
                 if x == 1:
                     victorias_consecutivas += 1
@@ -140,6 +141,7 @@ plt.savefig('TP1.2Ruleta/frec_rel.png')
 plt.clf()
 
 plt.plot(flujo_caja, label= "Flujo de caja. Martingala acotada")
+plt.axhline(y = caja_acotada, color = 'blue', linestyle = '-')
 plt.ylabel("Cantidad en caja")
 plt.xlabel("Numero de tirada")
 plt.savefig('TP1.2Ruleta/flujo_mart_acotada.png')
@@ -148,6 +150,7 @@ plt.clf()
 #martingala infinita
 frec_rel, flujo_caja = ruleta(corrida, "infinita", "martingala")
 plt.plot(flujo_caja, label= "Flujo de caja. Martingala infinita")
+plt.axhline(y = caja_infinita, color = 'blue', linestyle = '-')
 plt.ylabel("Cantidad en caja")
 plt.xlabel("Numero de tirada")
 plt.savefig('TP1.2Ruleta/flujo_mart_infinita.png')
@@ -156,6 +159,7 @@ plt.clf()
 #dalembert acotada
 frec_rel, flujo_caja = ruleta(corrida, "acotada", "dalembert")
 plt.plot(flujo_caja, label= "Flujo de caja. Dalembert acotada")
+plt.axhline(y = caja_acotada, color = 'blue', linestyle = '-')
 plt.ylabel("Cantidad en caja")
 plt.xlabel("Numero de tirada")
 plt.savefig('TP1.2Ruleta/flujo_dalem_acotada.png')
@@ -164,6 +168,7 @@ plt.clf()
 #dalembert infinita
 frec_rel, flujo_caja = ruleta(corrida, "infinita", "dalembert")
 plt.plot(flujo_caja, label= "Flujo de caja. Dalembert infinita")
+plt.axhline(y = caja_infinita, color = 'blue', linestyle = '-')
 plt.ylabel("Cantidad en caja")
 plt.xlabel("Numero de tirada")
 plt.savefig('TP1.2Ruleta/flujo_dalem_infinita.png')
@@ -172,6 +177,7 @@ plt.clf()
 #Paroli acotada
 frec_rel, flujo_caja = ruleta(corrida, "acotada", "paroli")
 plt.plot(flujo_caja, label= "Flujo de caja. Paroli acotada")
+plt.axhline(y = caja_acotada, color = 'blue', linestyle = '-')
 plt.ylabel("Cantidad en caja")
 plt.xlabel("Numero de tirada")
 plt.savefig('TP1.2Ruleta/flujo_paroli_acotada.png')
@@ -180,6 +186,7 @@ plt.clf()
 #Paroli infinita
 frec_rel, flujo_caja = ruleta(corrida, "infinita", "paroli")
 plt.plot(flujo_caja, label= "Flujo de caja. Paroli infinita")
+plt.axhline(y = caja_infinita, color = 'blue', linestyle = '-')
 plt.ylabel("Cantidad en caja")
 plt.xlabel("Numero de tirada")
 plt.savefig('TP1.2Ruleta/flujo_paroli_infinita.png')
@@ -218,21 +225,27 @@ for i in range(cant_corridas):
 x = np.arange(len(prom_de_frecuencias))#para grafico de barras
 print(sum(prom_de_frecuencias)/cant_corridas)
 
+ax1.axhline(y = caja_acotada, color = 'blue', linestyle = '-')
 ax1.set_xlabel('n (número de tiradas)')
 ax1.set_ylabel('Flujo de caja')
 
+ax2.axhline(y = caja_infinita, color = 'blue', linestyle = '-')
 ax2.set_xlabel('n (número de tiradas)')
 ax2.set_ylabel('Flujo de caja')
 
+ax3.axhline(y = caja_acotada, color = 'blue', linestyle = '-')
 ax3.set_xlabel('n (número de tiradas)')
 ax3.set_ylabel('Flujo de caja')
 
+ax4.axhline(y = caja_infinita, color = 'blue', linestyle = '-')
 ax4.set_xlabel('n (número de tiradas)')
 ax4.set_ylabel('Flujo de caja')
 
+ax5.axhline(y = caja_acotada, color = 'blue', linestyle = '-')
 ax5.set_xlabel('n (número de tiradas)')
 ax5.set_ylabel('Flujo de caja')
 
+ax6.axhline(y = caja_infinita, color = 'blue', linestyle = '-')
 ax6.set_xlabel('n (número de tiradas)')
 ax6.set_ylabel('Flujo de caja')
 
