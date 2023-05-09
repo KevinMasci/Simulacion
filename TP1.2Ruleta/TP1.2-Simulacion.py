@@ -4,12 +4,12 @@ import matplotlib.pyplot as plt
 rojos=[1,3,5,7,9,12,14,16,18,19,21,23,25,27,30,32,34,36]
 negros=[2,4,6,8,10,11,13,15,17,20,22,24,26,28,29,31,33,35]
 
-n = 1000  #Número de tiradas de la ruleta
+n = 100  #Número de tiradas de la ruleta
 corrida = [np.random.randint(0,37) for i in range(n)]
 cant_corridas = 37
 
-caja_acotada = 100
-caja_infinita = 10000000
+caja_acotada = 1000
+caja_infinita = 8731
 apuesta_inicial = 10
 
 #Función que define la estrategia Martingala
@@ -39,7 +39,9 @@ def martingala(corrida, tipo_caja):
         if caja_actual < apuesta or caja_actual <= 0: 
             break
     for i in cuando_gane:
-        cuando_gane[i] /= cont_ganados
+        if cont_ganados > 0:
+            cuando_gane[i] /= cont_ganados
+        else: cuando_gane[i] = 0
     cuando_gane = {k: v for k, v in cuando_gane.items() if v > 0.0}
     return flujo_caja, cuando_gane
 
@@ -70,7 +72,9 @@ def dalembert(corrida,tipo_caja):
         if caja_actual < apuesta or caja_actual<=0: 
             break
     for i in cuando_gane:
-        cuando_gane[i] /= cont_ganados
+        if cont_ganados > 0:
+            cuando_gane[i] /= cont_ganados
+        else: cuando_gane[i] = 0
     cuando_gane = {k: v for k, v in cuando_gane.items() if v > 0.0}
     return flujo_caja, cuando_gane
 
@@ -108,7 +112,9 @@ def paroli(corrida, tipo_caja):
         if caja_actual < apuesta or caja_actual<=0: 
             break
     for i in cuando_gane:
-        cuando_gane[i] /= cont_ganados
+        if cont_ganados > 0:
+            cuando_gane[i] /= cont_ganados
+        else: cuando_gane[i] = 0
     cuando_gane = {k: v for k, v in cuando_gane.items() if v > 0.0}
     return flujo_caja, cuando_gane
 
@@ -248,7 +254,7 @@ fig10, ax10 = plt.subplots()
 fig11, ax11 = plt.subplots()
 fig12, ax12 = plt.subplots()
 
-for i in range(cant_corridas):
+for i in range(15):
     corrida2 = [np.random.randint(0,37) for j in range(n)]
     flujo_martingala_acotada, cuando_gane_martingala_acotada= martingala(corrida2, "acotada")
     flujo_martingala_infinita, cuando_gane_martingala_infinita = martingala(corrida2, "infinita")
