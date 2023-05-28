@@ -335,7 +335,7 @@ p = 0.5
 muestras_binomial = [binomial_rechazo(n, p) for _ in range(1000)]
 valores_unicos = np.unique(muestras_binomial)
 frecuencias = [muestras_binomial.count(valor) for valor in valores_unicos]
-plt.bar(valores_unicos, frecuencias)
+plt.bar(valores_unicos, frecuencias, width=0.1)
 plt.xlabel('Valores')
 plt.ylabel('Frecuencia')
 plt.title('Distribución Binomial')
@@ -346,7 +346,7 @@ lam = 3
 muestras_poisson = [poisson_rechazo(lam) for _ in range(1000)]
 valores_unicos = np.unique(muestras_poisson)
 frecuencias = [muestras_poisson.count(valor) for valor in valores_unicos]
-plt.bar(valores_unicos, frecuencias)
+plt.bar(valores_unicos, frecuencias, width=0.1)
 plt.xlabel('Valores')
 plt.ylabel('Frecuencia')
 plt.title('Distribución de Poisson')
@@ -452,6 +452,7 @@ print("Media teórica:", media_normal_sklearn)
 print("Media muestral:", np.mean(data_normal_sklearn))
 print("Varianza teórica:", varianza_normal_sklearn)
 print("Varianza muestral:", np.var(data_normal_sklearn))
+print()
 
 #Pascal
 data_pascal = np.array([pascal(k_pascal, q_pascal) for _ in range(size)])
