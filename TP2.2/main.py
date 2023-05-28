@@ -4,9 +4,7 @@ import matplotlib.pyplot as plt
 import math
 from numpy import log as ln, exp
 import scipy.stats as stats
-import statsmodels.api as sm
 from sklearn.mixture import GaussianMixture
-from scipy.stats import uniform, expon, norm, gamma, nbinom, hypergeom, poisson, binom, rv_discrete
 
 #Constantes
 muestra_empirica = [0.273, 0.037, 0.195, 0.009, 0.124, 0.058, 0.062, 0.151, 0.047, 0.044]
@@ -34,7 +32,7 @@ def normal(ex, stdx):
     return x
 
 # Gamma
-def gamma(k, a):
+def inv_gamma(k, a):
     tr = 1
     for _ in range(k):
         r = random.random()
@@ -64,18 +62,19 @@ def binomial(n, p):
 #Hipergeométrica
 def hipergeometrica(tn, ns, p):
     x = 0
-    for _ in range(1, ns):
+    for i in range(1, ns + 1):
         r = random.random()
-        if (r-p) <= 0:
+        if r - p <= 0:
             s = 1
             x += 1
-        else: s = 0
+        else:
+            s = 0
         p = (tn * p - s) / (tn - 1)
         tn -= 1
     return x
 
 #Poisson
-def poisson(p):
+def inv_poisson(p):
     x = 0
     b = exp(-p)
     tr = 1
@@ -105,7 +104,6 @@ plt.hist(datos_uniforme, bins=30, density=True)
 plt.xlabel('Valores')
 plt.ylabel('Frecuencia')
 plt.title('Distribución Uniforme Continua')
-plt.grid(True)
 plt.show()
 
 # Distribución Exponencial
@@ -114,7 +112,6 @@ plt.hist(datos_exponencial, bins=30, density=True)
 plt.xlabel('Valores')
 plt.ylabel('Frecuencia')
 plt.title('Distribución Exponencial')
-plt.grid(True)
 plt.show()
 
 # Distribución Normal
@@ -123,61 +120,59 @@ plt.hist(datos_exponencial, bins=30, density=True)
 plt.xlabel('Valores')
 plt.ylabel('Frecuencia')
 plt.title('Distribución Normal')
-plt.grid(True)
 plt.show()
 
 #Distribución Gamma
-datos_gamma = np.random.gamma(shape=2, scale=2, size=1000)
+datos_gamma = [inv_gamma(2, 1) for _ in range(1000)]
 plt.hist(datos_gamma, bins=30, density=True)
 plt.xlabel('Valores')
 plt.ylabel('Frecuencia')
 plt.title('Distribución Gamma')
-plt.grid(True)
 plt.show()
 
 # Distribución Binomial
 datos_binomial = [binomial(10, 0.5) for _ in range(1000)]
-plt.hist(datos_binomial, bins=30, density=True)
+valores, frecuencias = np.unique(datos_binomial, return_counts=True)
+plt.bar(valores, frecuencias, width = 0.5)
 plt.xlabel('Valores')
 plt.ylabel('Frecuencia')
 plt.title('Distribución Binomial')
-plt.grid(True)
 plt.show()
 
 # Distribución de Poisson
-datos_poisson = np.random.poisson(lam=3, size=1000)
-plt.hist(datos_poisson, bins=30, density=True)
+datos_poisson = [inv_poisson(3) for _ in range (1000)]
+valores, frecuencias = np.unique(datos_poisson, return_counts=True)
+plt.bar(valores, frecuencias, width=0.5)
 plt.xlabel('Valores')
 plt.ylabel('Frecuencia')
 plt.title('Distribución de Poisson')
-plt.grid(True)
 plt.show()
 
 # Distribución de Pascal
-datos_pascal = [pascal(5, 0.3) for _ in range(1000)]
-plt.hist(datos_pascal, bins=30, density=True)
+datos_pascal = [int(pascal(5, 0.3)) for _ in range(1000)]
+valores, frecuencias = np.unique(datos_pascal, return_counts=True)
+plt.bar(valores, frecuencias, width=0.5)
 plt.xlabel('Valores')
 plt.ylabel('Frecuencia')
 plt.title('Distribución Pascal')
-plt.grid(True)
 plt.show()
 
 # Distribución Hipergeométrica
-datos_hipergeometrica = [hipergeometrica(20, 7, 0.4) for _ in range(1000)]
-plt.hist(datos_hipergeometrica, bins=30, density=True)
+datos_hipergeometrica = [hipergeometrica(50, 20, 0.5) for _ in range(1000)]
+valores, frecuencias = np.unique(datos_hipergeometrica, return_counts=True)
+plt.bar(valores, frecuencias, width=0.5)
 plt.xlabel('Valores')
 plt.ylabel('Frecuencia')
 plt.title('Distribución Hipergeométrica')
-plt.grid(True)
 plt.show()
 
 #Empírica Discreta
 muestra = [empirica_discreta(muestra_empirica) for _ in range(1000)]
-plt.hist(muestra, bins=len(muestra_empirica), density=True)
+valores, frecuencias = np.unique(muestra, return_counts=True)
+plt.bar(valores, frecuencias, width=0.5)
 plt.xlabel('Valores')
 plt.ylabel('Frecuencia')
 plt.title('Distribución Empírica Discreta')
-plt.grid(True)
 plt.show()
 
 # Metodo del rechazo
@@ -253,27 +248,25 @@ def poisson_rechazo(lam):
             return x
 
 def pascal_rechazo(k, p):
-    c = int(p / (1 - p) ** k)  # Calcula la constante de rechazo c como entero
+    c = int(p / (1 - p)) ** k  # Calcula la constante de rechazo c como entero
     while True:
-        x = random.randint(0, c)  # Genera una variable aleatoria discreta con distribución uniforme
+        x = random.randint(0, k)  # Genera una variable aleatoria discreta con distribución uniforme
         fx = math.comb(x + k - 1, k - 1) * p ** k * (1 - p) ** x  # Calcula la función de probabilidad de la distribución de Pascal
         r = random.uniform(0, 1)  # Calcula la probabilidad de aceptación
         # Comprueba si se cumple la condición de rechazo
-        if r <= fx / (c + 1):
+        if r <= fx / c:
             return x
 
-def hipergeometrica_rechazo(N, K, n):
-    def hipergeometrica_pdf(k, N, K, n):
-        return math.comb(K, k) * math.comb(N - K, n - k) / math.comb(N, n)
-    c = math.comb(K, n) * math.comb(N - K, n) / math.comb(N, n)
-    hipergeometrica = []
-    while len(hipergeometrica) < n:
-        g = random.randint(0, K)
-        p = hipergeometrica_pdf(g, N, K, n)
-        r = random.uniform(0, c * hipergeometrica_pdf(K, N, K, n))
-        if r <= p:
-            hipergeometrica.append(g)
-    return hipergeometrica
+def hipergeometrica_rechazo(N, m, n):
+    x = 0
+    for _ in range(n):
+        p = m / N
+        r = random.random()
+        if r < p:
+            x += 1
+            m -= 1
+        N -= 1
+    return x
 
     
 def empirica_discreta_rechazo(muestra_empirica):
@@ -336,7 +329,9 @@ plt.show()
 n = 10
 p = 0.5
 muestras_binomial = [binomial_rechazo(n, p) for _ in range(1000)]
-plt.hist(muestras_binomial, bins=30, density=True)
+valores_unicos = np.unique(muestras_binomial)
+frecuencias = [muestras_binomial.count(valor) for valor in valores_unicos]
+plt.bar(valores_unicos, frecuencias)
 plt.xlabel('Valores')
 plt.ylabel('Frecuencia')
 plt.title('Distribución Binomial')
@@ -346,7 +341,9 @@ plt.show()
 # Distribución de Poisson
 lam = 3
 muestras_poisson = [poisson_rechazo(lam) for _ in range(1000)]
-plt.hist(muestras_poisson, bins=30, density=True)
+valores_unicos = np.unique(muestras_poisson)
+frecuencias = [muestras_poisson.count(valor) for valor in valores_unicos]
+plt.bar(valores_unicos, frecuencias)
 plt.xlabel('Valores')
 plt.ylabel('Frecuencia')
 plt.title('Distribución de Poisson')
@@ -355,9 +352,11 @@ plt.show()
 
 # Distribución Pascal
 k = 5
-p = 0.3
+p = 0.5
 muestras_pascal = [pascal_rechazo(k, p) for _ in range(1000)]
-plt.hist(muestras_pascal, bins=30, density=True)
+valores_unicos = np.unique(muestras_pascal)
+frecuencias = [muestras_pascal.count(valor) for valor in valores_unicos]
+plt.bar(valores_unicos, frecuencias, width=0.2)
 plt.xlabel('Valores')
 plt.ylabel('Frecuencia')
 plt.title('Distribución Pascal')
@@ -365,11 +364,13 @@ plt.grid(True)
 plt.show()
 
 # Distribución Hipergeométrica
-N = 20
-K = 7
-n = 12
-muestras_hipergeometrica = hipergeometrica_rechazo(N, K, n)
-plt.hist(muestras_hipergeometrica, bins=30, density=True)
+N = 1000
+m = 500
+n = 200
+muestras_hipergeometrica = [hipergeometrica_rechazo(N, m, n) for _ in range(1000)]
+valores_unicos = np.unique(muestras_hipergeometrica)
+frecuencias = [muestras_hipergeometrica.count(valor) for valor in valores_unicos]
+plt.bar(valores_unicos, frecuencias)
 plt.xlabel('Valores')
 plt.ylabel('Frecuencia')
 plt.title('Distribución Hipergeométrica')
@@ -379,7 +380,9 @@ plt.show()
 # Distribución Empírica Discreta
 muestra_empirica = [1, 3, 5, 7, 9]
 muestras_empirica = [empirica_discreta_rechazo(muestra_empirica) for _ in range(1000)]
-plt.hist(muestras_empirica, bins=len(muestra_empirica), density=True)
+valores_unicos = np.unique(muestras_empirica)
+frecuencias = [muestras_empirica.count(valor) for valor in valores_unicos]
+plt.bar(valores_unicos, frecuencias)
 plt.xlabel('Valores')
 plt.ylabel('Frecuencia')
 plt.title('Distribución Empírica Discreta')
@@ -398,8 +401,8 @@ q_pascal = 0.3
 n_binomial = 10
 p_binomial = 0.4
 tn_hipergeometrica = 20
-ns_hipergeometrica = 10
-p_hipergeometrica = 6
+ns_hipergeometrica = 7
+p_hipergeometrica = 0.4
 lambda_poisson = 3
 size = 1000
 muestra_empirica_discreta = [1, 2, 3, 4, 5]
@@ -493,6 +496,7 @@ print("Media teórica:", media_teorica)
 print("Media muestral:", media_muestral)
 print("Varianza teórica:", varianza_teorica)
 print("Varianza muestral:", varianza_muestral)
+print()
 
 # Empírica discreta
 data_empirica_discreta = np.array([empirica_discreta(muestra_empirica_discreta) for _ in range(size)])
