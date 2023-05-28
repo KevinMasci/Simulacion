@@ -143,7 +143,7 @@ plt.show()
 # Distribución de Poisson
 datos_poisson = [inv_poisson(3) for _ in range (1000)] #Genera 1000 valores usando la función de la distribución Poisson
 valores, frecuencias = np.unique(datos_poisson, return_counts=True)
-plt.bar(valores, frecuencias, width=0.5)
+plt.bar(valores, frecuencias, width=0.1)
 plt.xlabel('Valores')
 plt.ylabel('Frecuencia')
 plt.title('Distribución de Poisson')
@@ -152,7 +152,7 @@ plt.show()
 # Distribución de Pascal
 datos_pascal = [int(pascal(5, 0.3)) for _ in range(1000)] #Genera 1000 valores usando la función de la distribución Pascal
 valores, frecuencias = np.unique(datos_pascal, return_counts=True)
-plt.bar(valores, frecuencias, width=0.5)
+plt.bar(valores, frecuencias, width=0.1)
 plt.xlabel('Valores')
 plt.ylabel('Frecuencia')
 plt.title('Distribución Pascal')
@@ -161,7 +161,7 @@ plt.show()
 # Distribución Hipergeométrica
 datos_hipergeometrica = [hipergeometrica(50, 20, 0.5) for _ in range(1000)] #Genera 1000 valores usando la función de la distribución Hipergeometrica
 valores, frecuencias = np.unique(datos_hipergeometrica, return_counts=True)
-plt.bar(valores, frecuencias, width=0.5)
+plt.bar(valores, frecuencias, width=0.1)
 plt.xlabel('Valores')
 plt.ylabel('Frecuencia')
 plt.title('Distribución Hipergeométrica')
@@ -170,7 +170,7 @@ plt.show()
 #Empírica Discreta
 muestra = [empirica_discreta(muestra_empirica) for _ in range(1000)] #Genera 1000 valores usando la función de la distribución Discreta
 valores, frecuencias = np.unique(muestra, return_counts=True)
-plt.bar(valores, frecuencias, width=0.5)
+plt.bar(valores, frecuencias, width=0.1)
 plt.xlabel('Valores')
 plt.ylabel('Frecuencia')
 plt.title('Distribución Empírica Discreta')
@@ -358,7 +358,7 @@ p = 0.5
 muestras_pascal = [pascal_rechazo(k, p) for _ in range(1000)]
 valores_unicos = np.unique(muestras_pascal)
 frecuencias = [muestras_pascal.count(valor) for valor in valores_unicos]
-plt.bar(valores_unicos, frecuencias, width=0.2)
+plt.bar(valores_unicos, frecuencias, width=0.1)
 plt.xlabel('Valores')
 plt.ylabel('Frecuencia')
 plt.title('Distribución Pascal')
@@ -371,7 +371,7 @@ n = 200
 muestras_hipergeometrica = [hipergeometrica_rechazo(N, m, n) for _ in range(1000)]
 valores_unicos = np.unique(muestras_hipergeometrica)
 frecuencias = [muestras_hipergeometrica.count(valor) for valor in valores_unicos]
-plt.bar(valores_unicos, frecuencias)
+plt.bar(valores_unicos, frecuencias, width = 0.1)
 plt.xlabel('Valores')
 plt.ylabel('Frecuencia')
 plt.title('Distribución Hipergeométrica')
@@ -382,7 +382,7 @@ muestra_empirica = [1, 3, 5, 7, 9]
 muestras_empirica = [empirica_discreta_rechazo(muestra_empirica) for _ in range(1000)]
 valores_unicos = np.unique(muestras_empirica)
 frecuencias = [muestras_empirica.count(valor) for valor in valores_unicos]
-plt.bar(valores_unicos, frecuencias)
+plt.bar(valores_unicos, frecuencias, width = 0.1)
 plt.xlabel('Valores')
 plt.ylabel('Frecuencia')
 plt.title('Distribución Empírica Discreta')
