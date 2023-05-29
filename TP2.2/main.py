@@ -7,22 +7,40 @@ import scipy.stats as stats
 from sklearn.mixture import GaussianMixture
 
 #Constantes
+a_uniforme = 0
+b_uniforme = 1
+lamb_exponencial = 2
+k_gamma = 2
+a_gamma = 1
+ex_normal=0
+stdx_normal=1
+k_pascal = 5
+q_pascal = 0.5
+p_pascal = 0.5
+n_binomial = 10
+p_binomial = 0.5
+tn_hipergeometrica = 50
+ns_hipergeometrica = 20
+p_hipergeometrica = 0.5
+m_hipergeometrica = 25
+lambda_poisson = 3
 muestra_empirica = [0.273, 0.037, 0.195, 0.009, 0.124, 0.058, 0.062, 0.151, 0.047, 0.044]
+size = 1000 #Tamaño de las muestras
 
-# Transformada inversa
-# Uniforme continua
+#Transformada inversa
+#Uniforme continua
 def uniforme(a, b):
     r = random.random()
     num = a + (b-a) * r
     return num
     
-# Exponencial
+#Exponencial
 def exponencial(lamb):
     r = random.random()
     num = -ln(1-r)/lamb
     return num
 
-# Normal
+#Normal
 def normal(ex, stdx):
     sum = 0
     for i in range(12):
@@ -31,7 +49,7 @@ def normal(ex, stdx):
     x = stdx * (sum - 6.0) + ex
     return x
 
-# Gamma
+#Gamma
 def inv_gamma(k, a):
     tr = 1
     for _ in range(k):
@@ -99,167 +117,167 @@ def empirica_discreta(muestra):
     return x
 
 #Gráficos Transformada Inversa
-# Distribución Uniforme
-datos_uniforme = [uniforme(0, 1) for _ in range(1000)] #Genera 1000 valores usando la función de la distribución Uniforme
+#Distribución Uniforme
+datos_uniforme = [uniforme(a_uniforme, b_uniforme) for _ in range(size)] #Genera 1000 valores usando la función de la distribución Uniforme
 plt.hist(datos_uniforme, bins=30, density=True)
 plt.xlabel('Valores')
-plt.ylabel('Frecuencia')
-plt.title('Distribución Uniforme Continua')
+plt.ylabel('Densidad')
+plt.title('Distribución Uniforme Continua-Transformada Inversa')
 plt.show()
 
-# Distribución Exponencial
-datos_exponencial = [exponencial(2) for _ in range(1000)] #Genera 1000 valores usando la función de la distribución Exponencial
+#Distribución Exponencial
+datos_exponencial = [exponencial(lamb_exponencial) for _ in range(size)] #Genera 1000 valores usando la función de la distribución Exponencial
 plt.hist(datos_exponencial, bins=30, density=True)
 plt.xlabel('Valores')
-plt.ylabel('Frecuencia')
-plt.title('Distribución Exponencial')
+plt.ylabel('Densidad')
+plt.title('Distribución Exponencial-Transformada Inversa')
 plt.show()
 
-# Distribución Normal
-datos_exponencial = [normal(0, 1) for _ in range(1000)] #Genera 1000 valores usando la función de la distribución Normal
-plt.hist(datos_exponencial, bins=30, density=True)
+#Distribución Normal
+datos_normal = [normal(ex_normal, stdx_normal) for _ in range(size)] #Genera 1000 valores usando la función de la distribución Normal
+plt.hist(datos_normal, bins=30, density=True)
 plt.xlabel('Valores')
-plt.ylabel('Frecuencia')
-plt.title('Distribución Normal')
+plt.ylabel('Densidad')
+plt.title('Distribución Normal-Transformada Inversa')
 plt.show()
 
 #Distribución Gamma
-datos_gamma = [inv_gamma(2, 1) for _ in range(1000)] #Genera 1000 valores usando la función de la distribución Gamma
+datos_gamma = [inv_gamma(k_gamma, a_gamma) for _ in range(size)] #Genera 1000 valores usando la función de la distribución Gamma
 plt.hist(datos_gamma, bins=30, density=True)
 plt.xlabel('Valores')
-plt.ylabel('Frecuencia')
-plt.title('Distribución Gamma')
+plt.ylabel('Densidad')
+plt.title('Distribución Gamma-Transformada Inversa')
 plt.show()
 
-# Distribución Binomial
-datos_binomial = [binomial(10, 0.5) for _ in range(1000)] #Genera 1000 valores usando la función de la distribución Binomial
+#Distribución Binomial
+datos_binomial = [binomial(n_binomial, p_binomial) for _ in range(size)] #Genera 1000 valores usando la función de la distribución Binomial
 valores, frecuencias = np.unique(datos_binomial, return_counts=True)
 plt.bar(valores, frecuencias, width = 0.1)
 plt.xlabel('Valores')
 plt.ylabel('Frecuencia')
-plt.title('Distribución Binomial')
+plt.title('Distribución Binomial-Transformada Inversa')
 plt.show()
 
-# Distribución de Poisson
-datos_poisson = [inv_poisson(3) for _ in range (1000)] #Genera 1000 valores usando la función de la distribución Poisson
+#Distribución de Poisson
+datos_poisson = [inv_poisson(lambda_poisson) for _ in range (size)] #Genera 1000 valores usando la función de la distribución Poisson
 valores, frecuencias = np.unique(datos_poisson, return_counts=True)
 plt.bar(valores, frecuencias, width=0.1)
 plt.xlabel('Valores')
 plt.ylabel('Frecuencia')
-plt.title('Distribución de Poisson')
+plt.title('Distribución de Poisson-Transformada Inversa')
 plt.show()
 
 # Distribución de Pascal
-datos_pascal = [int(pascal(5, 0.3)) for _ in range(1000)] #Genera 1000 valores usando la función de la distribución Pascal
+datos_pascal = [int(pascal(k_pascal, q_pascal)) for _ in range(size)] #Genera 1000 valores usando la función de la distribución Pascal
 valores, frecuencias = np.unique(datos_pascal, return_counts=True)
 plt.bar(valores, frecuencias, width=0.1)
 plt.xlabel('Valores')
 plt.ylabel('Frecuencia')
-plt.title('Distribución Pascal')
+plt.title('Distribución Pascal-Transformada Inversa')
 plt.show()
 
 # Distribución Hipergeométrica
-datos_hipergeometrica = [hipergeometrica(50, 20, 0.5) for _ in range(1000)] #Genera 1000 valores usando la función de la distribución Hipergeometrica
+datos_hipergeometrica = [hipergeometrica(tn_hipergeometrica, ns_hipergeometrica, p_hipergeometrica) for _ in range(size)] #Genera 1000 valores usando la función de la distribución Hipergeometrica
 valores, frecuencias = np.unique(datos_hipergeometrica, return_counts=True)
 plt.bar(valores, frecuencias, width=0.1)
 plt.xlabel('Valores')
 plt.ylabel('Frecuencia')
-plt.title('Distribución Hipergeométrica')
+plt.title('Distribución Hipergeométrica-Transformada Inversa')
 plt.show()
 
 #Empírica Discreta
-muestra = [empirica_discreta(muestra_empirica) for _ in range(1000)] #Genera 1000 valores usando la función de la distribución Discreta
+muestra = [empirica_discreta(muestra_empirica) for _ in range(size)] #Genera 1000 valores usando la función de la distribución Discreta
 valores, frecuencias = np.unique(muestra, return_counts=True)
 plt.bar(valores, frecuencias, width=0.1)
 plt.xlabel('Valores')
 plt.ylabel('Frecuencia')
-plt.title('Distribución Empírica Discreta')
+plt.title('Distribución Empírica Discreta-Transformada Inversa')
 plt.show()
 
-# Metodo del rechazo
+#Método del rechazo
 #Distribución Uniforme
 def uniforme_rechazo(a, b):
     while True:
-        r1 = random.uniform(0, 1)  # Generar un valor aleatorio U en el rango [0, 1]
-        X = a + (b - a) * r1  # Aplicar la transformación para obtener X en el rango [a, b]
-        c = 1 / (b - a)  # Calcular la constante de rechazo
-        r2 = random.uniform(0, 1) # Generar otro valor aleatorio para comparar con el criterio de aceptación
-        # Comprobar el criterio de aceptación/rechazo
+        r1 = random.uniform(0, 1)  #Genera un valor aleatorio en el rango [0, 1]
+        X = a + (b - a) * r1  #Aplica la transformación para obtener X en el rango [a, b]
+        c = 1 / (b - a)  #Calcula la constante de rechazo
+        r2 = random.uniform(0, 1) #Genera otro valor aleatorio para comparar con el criterio de aceptación
+        #Comprueba el criterio de aceptación/rechazo
         if r2 <= c:
-            return X  # Devolver el valor aceptado
+            return X  #Devuelve el valor aceptado
 
 #Distribución Exponencial
 def exponencial_rechazo(lambd):
     while True:
-        r1 = random.uniform(0, 1)  # Generar un valor aleatorio r1 en el rango [0, 1]
-        r2 = random.uniform(0, 1)  # Generar un valor aleatorio r2 en el rango [0, 1]
-        X = -math.log(r1) / lambd  # Aplicar la transformación para obtener X según la distribución exponencial
-        c = lambd  # Calcular la constante de rechazo
-        # Comprobar el criterio de aceptación/rechazo
+        r1 = random.uniform(0, 1)  #Genera un valor aleatorio r1 en el rango [0, 1]
+        r2 = random.uniform(0, 1)  #Genera un valor aleatorio r2 en el rango [0, 1]
+        X = -math.log(r1) / lambd  #Aplica la transformación para obtener X según la distribución exponencial
+        c = lambd  #Calcula la constante de rechazo
+        #Comprueba el criterio de aceptación/rechazo
         if r2 <= math.exp(-c * X):
-            return X  # Devolver el valor aceptado
-        
-#Distribución Gamma          
-def gamma_rechazo(alpha, beta):
+            return X  #Devuelve el valor aceptado
+          
+#Distribución Gamma
+def gamma_rechazo(k, a):
     while True:
-        r1 = exponencial_rechazo(beta)   # Generar un valor de prueba utilizando una distribución exponencial
-        r2 = random.uniform(0, 1) # Generar una variable aleatoria U en el rango [0, 1]
-        c = (beta ** alpha) / math.gamma(alpha) # Calcular la constante de rechazo
-        X = r1 ** (alpha - 1) * math.exp(-r1) / c # Calcular el valor candidato
-        # Comprobar el criterio de aceptación/rechazo
+        r1 = exponencial_rechazo(a)  #Genera un valor de prueba utilizando una distribución exponencial
+        r2 = random.uniform(0, 1) #Genera una variable aleatoria r2 en el rango [0, 1]
+        c = (a ** k) / math.gamma(k) #Calcula la constante de rechazo
+        X = r1 ** (k - 1) * math.exp(-r1) / c #Calcula el valor candidato
+        #Comprueba el criterio de aceptación/rechazo
         if r2 <= X:
             return r1
 
 #Distribución Normal
 def normal_rechazo(mu, sigma):
     while True:
-        # Generar dos valores aleatorios uniformes en el rango (0, 1]
+        #Genera dos valores aleatorios uniformes en el rango (0, 1]
         r1 = random.uniform(0, 1)
         r2 = random.uniform(0, 1)
-        # Aplicar la transformación de Box-Muller para obtener un valor aleatorio normalmente distribuido
+        #Aplica la transformación de Box-Muller para obtener un valor aleatorio normalmente distribuido
         Z = math.sqrt(-2 * math.log(r1)) * math.cos(2 * math.pi * r2)
-        X = Z * sigma + mu # Calcular el valor candidato
-        c = math.exp(-0.5 * ((X - mu) / sigma) ** 2) / (sigma * math.sqrt(2 * math.pi)) # Calcular la constante de rechazo
-        r = random.uniform(0, 1)  # Generar un valor aleatorio uniforme en el rango (0, 1]
-        # Comprobar el criterio de aceptación/rechazo
+        X = Z * sigma + mu #Calcula el valor candidato
+        c = math.exp(-0.5 * ((X - mu) / sigma) ** 2) / (sigma * math.sqrt(2 * math.pi)) #Calcula la constante de rechazo
+        r = random.uniform(0, 1)  #Genera un valor aleatorio uniforme en el rango (0, 1]
+        #Comprueba el criterio de aceptación/rechazo
         if r <= c:
             return X
 
 #Distribución Binomial
 def binomial_rechazo(n, p):
-    # Se define una constante c tal que c >= n*(1-p)/p**2
+    #Calcula la constante de rechazo
     c = math.ceil(n*(1-p)/(p**2))
     while True:
-        # Se generan dos números aleatorios r1 y r2 distribuidos uniformemente en [0,1)
+        #Genera dos números aleatorios r1 y r2 distribuidos uniformemente en [0,1)
         r1 = random.uniform(0, 1)
         r2 = random.uniform(0, 1)
-        # Se calcula la función de probabilidad para g
+        #Calcula la función de probabilidad para g
         g = math.floor(r1 * c) + 1
-        prob = (1-p)**(n-g) * p**g * math.comb(n, g)
-        # Se rechaza el número generado si V > prob
+        prob = ((1-p)**(n-g)) * (p**g) * (math.comb(n, g))
+        #Rechaza el número generado si r2 > prob
         if r2 <= prob:
             return g
 
 #Distribución de Poisson
 def poisson_rechazo(lam):
-    c = math.exp(lam) + 1  # Calcula la constante de rechazo c
+    c = math.exp(lam) + 1  #Calcula la constante de rechazo c
     while True:
-        x = random.choices(range(int(c+1)))  # Genera una variable aleatoria discreta con distribución uniforme
+        x = random.choices(range(int(c+1)))  #Genera una variable aleatoria discreta con distribución uniforme
         x = x[0]
-        fx = math.exp(-lam) * math.pow(lam, x) / math.factorial(x)  # Calcula la función de probabilidad de la distribución de Poisson
-        r = random.uniform(0, 1)  # Calcula la probabilidad de aceptación
-        # Comprueba si se cumple la condición de rechazo
+        fx = math.exp(-lam) * math.pow(lam, x) / math.factorial(x)  #Calcula la función de probabilidad de la distribución de Poisson
+        r = random.uniform(0, 1)  #Calcula la probabilidad de aceptación
+        #Comprueba si se cumple la condición de rechazo
         if r <= fx / (c + 1):
             return x
 
 #Distribución de Pascal
 def pascal_rechazo(k, p):
-    c = int(p / (1 - p)) ** k  # Calcula la constante de rechazo c como entero
+    c = (1 - p) ** k  #Calcula la constante de rechazo 
     while True:
-        x = random.randint(0, k)  # Genera una variable aleatoria discreta con distribución uniforme
-        fx = math.comb(x + k - 1, k - 1) * p ** k * (1 - p) ** x  # Calcula la función de probabilidad de la distribución de Pascal
-        r = random.uniform(0, 1)  # Calcula la probabilidad de aceptación
-        # Comprueba si se cumple la condición de rechazo
+        x = random.randint(k, k+1000)  #Genera una variable aleatoria discreta con distribución uniforme
+        fx = math.comb(k + x - 1, x) * (p ** k) * ((1 - p) ** (x)) #Calcula la función de probabilidad de la distribución de Pascal
+        r = random.uniform(0, 1)  #Calcula la probabilidad de aceptación
+        #Comprueba si se cumple la condición de rechazo
         if r <= fx / c:
             return x
 
@@ -276,139 +294,107 @@ def hipergeometrica_rechazo(N, m, n):
         N -= 1 #Se reduce en 1 el tamaño de la población total N
     return x 
 
-#Distribución Empírica Discreta    
+#Distribución Empírica Discreta
 def empirica_discreta_rechazo(muestra_empirica):
-    n = len(muestra_empirica)
-    p = np.ones(n) / n  # Probabilidades uniformes para cada valor en la muestra
-    c = np.max(p)  # Constante de rechazo, máximo de las probabilidades
+    n = len(muestra_empirica)  #Calcula la longitud de la muestra
+    p = np.ones(n) / n  #Probabilidades uniformes para cada valor en la muestra
+    c = np.max(p)  #Constante de rechazo
     while True:
-        x = random.choices(muestra_empirica)[0]  # Generar un valor aleatorio de la muestra
-        fx = p[muestra_empirica.index(x)]  # Probabilidad de x en la muestra
-        r = random.uniform(0, c)  # Generar una probabilidad de aceptación
+        x = random.choices(muestra_empirica)[0]  #Selecciona un valor al azar de la muestra
+        fx = p[muestra_empirica.index(x)]  # robabilidad de x en la muestra
+        r = random.uniform(0, c)  #Genera una probabilidad de aceptación
+        #Si se cumple la condición, se devuelve el valor, si no, se genera otro número
         if r <= fx:
             return x
         
 #Gráficos del método de rechazo
-# Distribución Uniforme
-a = 0
-b = 1
-muestras_uniforme = [uniforme_rechazo(a, b) for _ in range(1000)]
+#Distribución Uniforme
+muestras_uniforme = [uniforme_rechazo(a_uniforme, b_uniforme) for _ in range(1000)]
 plt.hist(muestras_uniforme, bins=30, density=True)
 plt.xlabel('Valores')
-plt.ylabel('Frecuencia')
-plt.title('Distribución Uniforme')
+plt.ylabel('Densidad')
+plt.title('Distribución Uniforme Continua-Método de Rechazo')
 plt.show()
 
-# Distribución Exponencial
-lambd = 2
-muestras_exponencial = [exponencial_rechazo(lambd) for _ in range(1000)]
+#Distribución Exponencial
+muestras_exponencial = [exponencial_rechazo(lamb_exponencial) for _ in range(1000)]
 plt.hist(muestras_exponencial, bins=30, density=True)
 plt.xlabel('Valores')
-plt.ylabel('Frecuencia')
-plt.title('Distribución Exponencial')
+plt.ylabel('Densidad')
+plt.title('Distribución Exponencial-Método de Rechazo')
 plt.show()
 
-# Distribución Gamma
-alpha = 2
-beta = 1
-muestras_gamma = [gamma_rechazo(alpha, beta) for _ in range(1000)]
+#Distribución Gamma
+muestras_gamma = [gamma_rechazo(k_gamma, a_gamma) for _ in range(1000)]
 plt.hist(muestras_gamma, bins=30, density=True)
 plt.xlabel('Valores')
-plt.ylabel('Frecuencia')
-plt.title('Distribución Gamma')
+plt.ylabel('Densidad')
+plt.title('Distribución Gamma-Método de Rechazo')
 plt.show()
 
-# Distribución Normal
-mu = 0
-sigma = 1
-muestras_normal = [normal_rechazo(mu, sigma) for _ in range(1000)]
+#Distribución Normal
+muestras_normal = [normal_rechazo(ex_normal, stdx_normal) for _ in range(1000)]
 plt.hist(muestras_normal, bins=30, density=True)
 plt.xlabel('Valores')
-plt.ylabel('Frecuencia')
-plt.title('Distribución Normal')
+plt.ylabel('Densidad')
+plt.title('Distribución Normal-Método de Rechazo')
 plt.show()
 
-#Gráficos 
-# Distribución Binomial
-n = 10
-p = 0.5
-muestras_binomial = [binomial_rechazo(n, p) for _ in range(1000)]
+#Distribución Binomial
+muestras_binomial = [binomial_rechazo(10, 0.5) for _ in range(1000)]
 valores_unicos = np.unique(muestras_binomial)
 frecuencias = [muestras_binomial.count(valor) for valor in valores_unicos]
 plt.bar(valores_unicos, frecuencias, width=0.1)
 plt.xlabel('Valores')
 plt.ylabel('Frecuencia')
-plt.title('Distribución Binomial')
+plt.title('Distribución Binomial-Método de Rechazo')
 plt.show()
+print(valores_unicos)
+print(frecuencias)
 
-# Distribución de Poisson
-lam = 3
-muestras_poisson = [poisson_rechazo(lam) for _ in range(1000)]
+#Distribución de Poisson
+muestras_poisson = [poisson_rechazo(lambda_poisson) for _ in range(1000)]
 valores_unicos = np.unique(muestras_poisson)
 frecuencias = [muestras_poisson.count(valor) for valor in valores_unicos]
 plt.bar(valores_unicos, frecuencias, width=0.1)
 plt.xlabel('Valores')
 plt.ylabel('Frecuencia')
-plt.title('Distribución de Poisson')
+plt.title('Distribución de Poisson-Método de Rechazo')
 plt.show()
 
-# Distribución Pascal
-k = 5
-p = 0.5
-muestras_pascal = [pascal_rechazo(k, p) for _ in range(1000)]
+#Distribución Pascal
+muestras_pascal = [pascal_rechazo(k_pascal, p_pascal) for _ in range(1000)]
 valores_unicos = np.unique(muestras_pascal)
 frecuencias = [muestras_pascal.count(valor) for valor in valores_unicos]
 plt.bar(valores_unicos, frecuencias, width=0.1)
 plt.xlabel('Valores')
 plt.ylabel('Frecuencia')
-plt.title('Distribución Pascal')
+plt.title('Distribución Pascal-Método de Rechazo')
 plt.show()
 
-# Distribución Hipergeométrica
-N = 1000
-m = 500
-n = 200
-muestras_hipergeometrica = [hipergeometrica_rechazo(N, m, n) for _ in range(1000)]
+#Distribución Hipergeométrica
+muestras_hipergeometrica = [hipergeometrica_rechazo(tn_hipergeometrica, m_hipergeometrica, ns_hipergeometrica) for _ in range(1000)]
 valores_unicos = np.unique(muestras_hipergeometrica)
 frecuencias = [muestras_hipergeometrica.count(valor) for valor in valores_unicos]
-plt.bar(valores_unicos, frecuencias, width = 0.1)
+plt.bar(valores_unicos, frecuencias, width=0.1)
 plt.xlabel('Valores')
 plt.ylabel('Frecuencia')
-plt.title('Distribución Hipergeométrica')
+plt.title('Distribución Hipergeométrica-Método de Rechazo')
 plt.show()
 
-# Distribución Empírica Discreta
-muestra_empirica = [1, 3, 5, 7, 9]
+#Distribución Empírica Discreta
 muestras_empirica = [empirica_discreta_rechazo(muestra_empirica) for _ in range(1000)]
 valores_unicos = np.unique(muestras_empirica)
 frecuencias = [muestras_empirica.count(valor) for valor in valores_unicos]
-plt.bar(valores_unicos, frecuencias, width = 0.1)
+plt.bar(valores_unicos, frecuencias, width=0.1)
 plt.xlabel('Valores')
 plt.ylabel('Frecuencia')
-plt.title('Distribución Empírica Discreta')
+plt.title('Distribución Empírica Discreta-Método de Rechazo')
 plt.show()
 
-# Test
-# Parámetros para las distribuciones
-a_uniforme = 0
-b_uniforme = 1
-lamb_exponencial = 2
-k_gamma = 2
-a_gamma = 1.5
-k_pascal = 5
-q_pascal = 0.3
-n_binomial = 10
-p_binomial = 0.4
-tn_hipergeometrica = 20
-ns_hipergeometrica = 7
-p_hipergeometrica = 0.4
-lambda_poisson = 3
-size = 1000
-muestra_empirica_discreta = [1, 2, 3, 4, 5]
-size = 1000 # Tamaño de las muestras
-
-# Generar muestras y realizar comparación para cada distribución
-# Uniforme continua
+#Test
+#Generar muestras y realizar comparación para cada distribución
+#Uniforme continua
 data_uniforme = np.array([uniforme(a_uniforme, b_uniforme) for _ in range(size)])
 media_uniforme = (a_uniforme+b_uniforme)/2
 varianza_uniforme = ((b_uniforme-a_uniforme)**2)/12
@@ -442,16 +428,14 @@ print("Varianza muestral:", np.var(data_gamma_scipy))
 print()
 
 #Normal
-gmm = GaussianMixture(n_components=1, covariance_type='full')
-gmm.fit(data_exponencial.reshape(-1, 1))
-data_normal_sklearn = gmm.sample(size)[0].flatten()
-media_normal_sklearn = np.mean(data_exponencial)
-varianza_normal_sklearn = np.var(data_exponencial)
+data_normal = np.array([normal(ex_normal, stdx_normal) for _ in range(size)])
+media_normal = ex_normal
+varianza_normal = stdx_normal**2
 print("Normal:")
-print("Media teórica:", media_normal_sklearn)
-print("Media muestral:", np.mean(data_normal_sklearn))
-print("Varianza teórica:", varianza_normal_sklearn)
-print("Varianza muestral:", np.var(data_normal_sklearn))
+print("Media teórica:", media_normal)
+print("Media muestral:", np.mean(data_normal))
+print("Varianza teórica:", varianza_normal)
+print("Varianza muestral:", np.var(data_normal))
 print()
 
 #Pascal
@@ -501,9 +485,9 @@ print("Varianza muestral:", varianza_muestral)
 print()
 
 #Empírica discreta
-data_empirica_discreta = np.array([empirica_discreta(muestra_empirica_discreta) for _ in range(size)])
-media_empirica_discreta = np.mean(muestra_empirica_discreta)
-varianza_empirica_discreta = np.var(muestra_empirica_discreta)
+data_empirica_discreta = np.array([empirica_discreta(muestra_empirica) for _ in range(size)])
+media_empirica_discreta = np.mean(muestra_empirica)
+varianza_empirica_discreta = np.var(muestra_empirica)
 print("Empírica discreta:")
 print("Media teórica:", media_empirica_discreta)
 print("Media muestral:", np.mean(data_empirica_discreta))
