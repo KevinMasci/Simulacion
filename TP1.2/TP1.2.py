@@ -45,6 +45,7 @@ def martingala(corrida, tipo_caja):
     cuando_gane = {k: v for k, v in cuando_gane.items() if v > 0.0}
     return flujo_caja, cuando_gane
 
+#Función que define la estrategia Dalembert
 def dalembert(corrida,tipo_caja):
     apuesta=apuesta_inicial
     flujo_caja = []
@@ -78,6 +79,7 @@ def dalembert(corrida,tipo_caja):
     cuando_gane = {k: v for k, v in cuando_gane.items() if v > 0.0}
     return flujo_caja, cuando_gane
 
+#Función que define la estrategia de Paroli
 def paroli(corrida, tipo_caja):
     apuesta=apuesta_inicial
     flujo_caja = []
