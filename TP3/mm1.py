@@ -32,7 +32,7 @@ def calc_prob(lista):
     
     for n in list(set(lista)):
         probs[n] = lista.count(n) / len(lista)
-        
+    
     return probs
 
 def initialize():
@@ -174,11 +174,10 @@ def report():
     for n, p in probabilidades_n_q.items():
         print(f"\t{n}\t\t{p}")
     
-    # Grafico de torta de las probabilidades de encontrar N clientes en cola.
-    labels = list(probabilidades_n_q.keys())
+    # Grafico de barras de las probabilidades de encontrar N clientes en cola.
+    n = list(probabilidades_n_q.keys())
     valores = list(probabilidades_n_q.values())
-    plt.pie(valores, labels=[None]*len(labels), autopct = lambda value: f'{value:.1f}%' if value >= 3 else '')
-    plt.legend(labels, loc="center left", bbox_to_anchor=(1, 0.5))
+    plt.bar(n, valores)
     plt.show()
     
 def update_time_avg_stats():
