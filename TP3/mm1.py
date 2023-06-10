@@ -1,198 +1,231 @@
 import random
 from numpy import log as ln
+import matplotlib.pyplot as plt
 
-Q_LIMIT = 100
-BUSY = 1
-IDLE = 0
+limite_Q = 100 # Límite de longitud de la cola
+BUSY = 1 # Servidor ocupado
+IDLE = 0 # Servidor libre
 
-# Variables globales
-next_event_type = None
-num_custs_delayed = 0
-num_delays_required = 0
-num_events = 0
-num_in_q = 0 # Q(t)
-server_status = IDLE # B(t)
-area_num_in_q = 0.0 # Area bajo Q(t)
-area_server_status = 0.0 # Area bajo B(t)
-mean_interarrival = 0.0
-mean_service = 0.0
-sim_time = 0.0
-time_arrival = [0.0] * (Q_LIMIT + 1)
-time_last_event  = 0.0
-time_next_event = [0.0] * 3
-total_of_delays = 0.0
-infile = None
-outfile = None
+tipo_prox_evento = None
+nro_clientes_atendidos = 0 # Número de clientes que han sido atendidos
+cant_clientes_cola = [] # Cantidad de clientes en cola en cada t
+nro_clientes_sistema = [] # Número de clientes en el sistema en cada t
+nro_atenciones_req = 1000 # Número de atenciones requeridas antes de finalizar la simulación
+nro_eventos_posibles = 0 # Número total de eventos posibles en el sistem
+nro_clientes_q = 0 # Q(t): número actual de clientes en la cola.
+estado_servidor = IDLE # B(t)
+area_q = 0.0 # Area bajo Q(t)
+area_estado_serv = 0.0 # Area bajo B(t)
+tasa_prom_llegada = 1.0 # Tasa promedio de llegada
+tasa_prom_servicio = 0.5 # Tasa promedio de servicio
+tiempo_sim = 0.0 
+tiempo_llegada = [0.0] * (limite_Q + 1) # Tiempo de llegada
+tiempo_ult_ev  = 0.0 # Último tiempo de evento
+tiempo_prox_ev = [0.0] * 3 # Próximos tiempos de eventos
+total_dem = 0.0 # Suma de todas las demoras 
 
-def expon(mean):
+def expon(mean): # Genera un número aleatorio distirbuido exponencialmente 
     return -float(mean) * ln(random.random())
 
+def calc_prob(lista):
+    probs = {}
+    
+    for n in list(set(lista)):
+        probs[n] = lista.count(n) / len(lista)
+        
+    return probs
+
 def initialize():
-    global sim_time, server_status, num_in_q, time_last_event, total_of_delays, num_custs_delayed, area_num_in_q, area_server_status, time_next_event
+    global tiempo_sim, estado_servidor, nro_clientes_q, ult_tiempo_ev, total_dem, nro_clientes_atendidos, area_q, area_estado_serv, tiempo_prox_ev
     
     # Reloj de simulacion
-    sim_time = 0
+    tiempo_sim = 0
     
     # Variables de estado
-    server_status = IDLE
-    num_in_q = 0
-    time_last_event = 0.0
+    estado_servidor = IDLE
+    nro_clientes_q = 0
+    ult_tiempo_ev = 0.0
     
     # Contadores estadisticos
-    num_custs_delayed = 0
-    total_of_delays = 0.0
-    area_num_in_q = 0.0
-    area_server_status = 0.0
+    nro_clientes_atendidos = 0
+    total_dem = 0.0
+    area_q = 0.0
+    area_estado_serv = 0.0
     
     # Lista de eventos inicial
-    time_next_event[1] = sim_time + expon(mean_interarrival)
-    time_next_event[2] = 1.0e+30
+    tiempo_prox_ev[1] = tiempo_sim + expon(tasa_prom_llegada)
+    tiempo_prox_ev[2] = 1.0e+30
     
 def timing():
-    global next_event_type, sim_time
+    global tipo_prox_evento, tiempo_sim 
     
     min_time_next_event = 1.0e+29
-    next_event_type = 0
+    tipo_prox_evento = 0
     
     # Determino el tipo del proximo evento.
-    for i in range(1, num_events+1):
-        if time_next_event[i] < min_time_next_event:
-            min_time_next_event = time_next_event[i]
-            next_event_type = i
+    for i in range(1, nro_eventos_posibles+1):
+        if tiempo_prox_ev[i] < min_time_next_event:
+            min_time_next_event = tiempo_prox_ev[i]
+            tipo_prox_evento = i
     
     # Me fijo si la lista de eventos esta vacia.
-    if next_event_type == 0:
+    if tipo_prox_evento == 0:
         # Lista vacia, termino la simulacion.
-        print(f"\nLista de eventos vacia en {sim_time}")
+        print(f"\nLista de eventos vacia en {tiempo_sim }")
         exit(1)
     
     # Lista no vacia, avanza el reloj de simulacion.
-    sim_time = min_time_next_event
+    tiempo_sim = min_time_next_event
 
 def arrive():
-    global num_in_q, server_status, num_custs_delayed, total_of_delays, sim_time
+    global nro_clientes_q, estado_servidor, nro_clientes_atendidos, total_dem, tiempo_sim, nro_clientes_sistema, cant_clientes_cola
     
     # Calculo el proximo arrivo.
-    time_next_event[1] = sim_time + expon(mean_interarrival)
+    tiempo_prox_ev[1] = tiempo_sim + expon(tasa_prom_llegada)
+    
+    nro_clientes_sistema.append(nro_clientes_sistema[-1] + 1)
     
     # Me fijo si el servidor esta ocupado.
-    if server_status == BUSY:
+    if estado_servidor == BUSY:
         # Servidor ocupado, incremento el numero de clientes en cola.
-        num_in_q += 1
+        nro_clientes_q += 1
+        cant_clientes_cola.append(nro_clientes_q)
         
         # Me fijo si existe condicion de desbordado (?).
-        if num_in_q > Q_LIMIT:
+        if nro_clientes_q > limite_Q:
             # La cola esta desbordada, termino la simulacion
-            print(f"\nDesbordamiento del arreglo array time_arrival en el tiempo {sim_time}")
+            print(f"\nDesbordamiento del arreglo array tiempo_llegada en el tiempo {tiempo_sim}")
             exit(2)
 
-        # Todavia hay espacio en la cola, guardo el tiempo de arrivo al final de time_arrival
-        time_arrival[num_in_q] = sim_time
+        # Todavia hay espacio en la cola, guardo el tiempo de arrivo al final de tiempo_llegada
+        tiempo_llegada[nro_clientes_q] = tiempo_sim
     else:
         # Servidor desocupado, el cliente tiene demora 0. Lo siguiente es solo para comprension del programa y no afecta la simulacion
         delay = 0.0
-        total_of_delays += delay
+        total_dem += delay
+        
+        cant_clientes_cola.append(0)
         
         # Incremento el numero de clientes demorados y pongo el servidor ocupado.
-        num_custs_delayed += 1
-        server_status = BUSY
+        nro_clientes_atendidos += 1
+        estado_servidor = BUSY
         
         # Calculo salida del cliente
-        time_next_event[2] = sim_time + expon(mean_service)
+        tiempo_prox_ev[2] = tiempo_sim + expon(tasa_prom_servicio)
     
 def depart():
-    global num_in_q, server_status, time_next_event, total_of_delays, num_custs_delayed, time_arrival, sim_time
+    global nro_clientes_q, estado_servidor, tiempo_prox_ev, total_dem, nro_clientes_atendidos, tiempo_llegada, tiempo_sim, nro_clientes_sistema, cant_clientes_cola
+    
+    nro_clientes_sistema.append(nro_clientes_sistema[-1] - 1)
     
     # Me fijo si la cola esta vacia
-    if num_in_q == 0:
+    if nro_clientes_q == 0:
         # Cola vacia, pongo el servidor desocupado y no tengo en concideracion el evento de partida.
-        server_status = IDLE
-        time_next_event[2] = 1.0e+30
+        estado_servidor = IDLE
+        tiempo_prox_ev[2] = 1.0e+30
+
     else:
         # Cola no vacia, disminuyo el numero de clientes en cola.
-        num_in_q -= 1
+        nro_clientes_q -= 1
+        cant_clientes_cola.append(nro_clientes_q)
         
         # Calculo la demora del cliente que entra en servicio y actualizo el acum de demora total.
-        delay = sim_time - time_arrival[1]
-        total_of_delays += delay
+        delay = tiempo_sim  - tiempo_llegada[1]
+        total_dem += delay
         
         # Incremento el numero de clientes demorados y calculo salida.
-        num_custs_delayed += 1
-        time_next_event[2] = sim_time + expon(mean_service)
+        nro_clientes_atendidos += 1
+        tiempo_prox_ev[2] = tiempo_sim + expon(tasa_prom_servicio)
         
         # Muevo los clientes en cola 1 lugar adelante
-        for i in range(1, num_in_q+1):
-            time_arrival[i] = time_arrival[i+1]
+        for i in range(1, nro_clientes_q+1):
+            tiempo_llegada[i] = tiempo_llegada[i+1]
             
 def report():
     # Calcula y escribe estimados de medidas de performance
     
     # Promedio de demora en cola
-    average_delay_in_queue = total_of_delays / num_custs_delayed
-    outfile.write(f"\nPromedio de demora en cola: {average_delay_in_queue:.3f} minutos")
+    prom_demora_cola = total_dem / nro_clientes_atendidos
+    print(f"\nPromedio de demora en cola: {prom_demora_cola:.3f} minutos")
+    
+    # Promedio de demora en el sistema
+    prom_prom_en_sistema = prom_demora_cola / tasa_prom_servicio
+    print(f"\nPromedio de demora en servicio: {prom_prom_en_sistema:.3f} minutos")
     
     # Promedio de numero de clientes en cola
-    average_num_in_queue = area_num_in_q / sim_time
-    outfile.write(f"\nPromedio de numero de clientes en cola: {average_num_in_queue:.3f}")
+    prom_nro_clientes_q = area_q / tiempo_sim
+    print(f"\nPromedio de numero de clientes en cola: {prom_nro_clientes_q:.3f}")
+    
+    # Promedio de numero de clientes en sistema
+    prom_nro_clientes_sistema = sum(nro_clientes_sistema) / len(nro_clientes_sistema)
+    print(f"\nPromedio de numero de clientes en el sistema: {prom_nro_clientes_sistema:.3f}")
     
     # Utilizacion del servidor
-    server_utilization = area_server_status / sim_time
-    outfile.write(f"\nUtilizacion del servidor: {server_utilization:.3f}")
+    utilizacion_servidor = area_estado_serv / tiempo_sim
+    print(f"\nUtilizacion del servidor: {utilizacion_servidor:.3f}")
     
     # Tiempo de fin de simulacion
-    outfile.write(f"\nTiempo de fin de simulacion: {sim_time:.3f} minutos")
+    print(f"\nTiempo de fin de simulacion: {tiempo_sim:.3f} minutos")
+    
+    # Probabilidad de encontrar n clientes en cola
+    probabilidades_n_q = calc_prob(cant_clientes_cola)
+    print("\nProbabilidad de encontrar n clientes en cola:")
+    print("Numero de clientes\tProbabilidad")
+    for n, p in probabilidades_n_q.items():
+        print(f"\t{n}\t\t{p}")
+    
+    # Grafico de torta de las probabilidades de encontrar N clientes en cola.
+    labels = list(probabilidades_n_q.keys())
+    valores = list(probabilidades_n_q.values())
+    plt.pie(valores, labels=[None]*len(labels), autopct = lambda value: f'{value:.1f}%' if value >= 3 else '')
+    plt.legend(labels, loc="center left", bbox_to_anchor=(1, 0.5))
+    plt.show()
     
 def update_time_avg_stats():
-    global area_num_in_q, time_last_event, sim_time, num_in_q, area_server_status
+    global area_q, ult_tiempo_ev, tiempo_sim, nro_clientes_q, area_estado_serv
     
     # Actualiza acumuladores de area para contadores estadisticos.
     
-    # Calculo tiempo desde el ultimo evento y actualizo el marcador de time_last_event
-    time_since_last_event = sim_time - time_last_event
-    time_last_event = sim_time
+    # Calculo tiempo desde el ultimo evento y actualizo el marcador de tiempo_ult_ev
+    time_since_last_event = tiempo_sim - ult_tiempo_ev
+    ult_tiempo_ev = tiempo_sim
     
-    # Actualizo area bajo Q(t) (num_in_q)
-    area_num_in_q += num_in_q * time_since_last_event
+    # Actualizo area bajo Q(t) (nro_clientes_q)
+    area_q += nro_clientes_q * time_since_last_event
     
-    # Actualizo el area bajo B(t) (server_status)
-    area_server_status += server_status * time_since_last_event
+    # Actualizo el area bajo B(t) (estado_servidor)
+    area_estado_serv += estado_servidor * time_since_last_event
             
 def main():
-    global infile, outfile, num_events, mean_interarrival, mean_service, num_delays_required
-    # Abro archivos de lectura y escritura
-    infile = open("TP3\mm1.in", "r")
-    outfile = open("TP3\mm1.out", "w")
+    global nro_eventos_posibles, tasa_prom_llegada, tasa_prom_servicio, nro_atenciones_req, nro_clientes_sistema
     
-    num_events = 2
-    
-    # Leo parametros de ingreso
-    mean_interarrival, mean_service, num_delays_required = infile.read().split()
+    nro_eventos_posibles = 2
     
     # Imprimo los parametros
-    outfile.write("Sistema de cola de un solo servidor\n\n")
-    outfile.write(f"Media de tiempo entre arrivos: {mean_interarrival} minutes\n\n")
-    outfile.write(f"Media del tiempo de servicio: {mean_service} minutes\n\n")
-    outfile.write(f"Numero de clientes: {num_delays_required}\n\n")
+    print("Sistema de cola de un solo servidor\n")
+    print(f"Media de tiempo entre arrivos: {tasa_prom_llegada} minutos\n")
+    print(f"Media del tiempo de servicio: {tasa_prom_servicio} minutos\n")
+    print(f"Numero de clientes: {nro_atenciones_req}\n")
     
     # Llamo a rutina de inicializacion
     initialize()
-    
     # Corro la simulacion hasta llegar al limite de Demorados
-    while (int(num_custs_delayed) < int(num_delays_required)):
+    
+    nro_clientes_sistema = [0]
+    
+    while (int(nro_clientes_atendidos) < int(nro_atenciones_req)):
         # Determino el siguiente evento
         timing()
         # Update time-average statistical accumulators.
         update_time_avg_stats()
         # Invoco la rutina de eventos
-        if next_event_type == 1:
+        if tipo_prox_evento == 1:
             arrive()
-        elif next_event_type == 2:
+        elif tipo_prox_evento == 2:
             depart()
     
-    # Invoco el generador de reporte, cierro los archivos y termino la simulacion
+    # Invoco el generador de reporte y termino la simulacion
     report()
-    infile.close()
-    outfile.close()
     
 if __name__ == "__main__":
     main()

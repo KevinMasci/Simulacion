@@ -43,13 +43,9 @@ def uniform(a, b):
     return a + random.random() * (b - a)
 
 def main():
-    global infile, outfile, num_events, initial_inv_level, num_months, num_policies
+    global num_events, initial_inv_level, num_months, num_policies
     global num_values_demand, mean_interdemand, setup_cost, incremental_cost, holding_cost
-    global shortage_cost, minlag, maxlag, prob_distrib_demand, smalls, bigs
-    
-    # Abro archivos de lectura y escritura
-    infile = open("TP3\inv.in", "r")
-    outfile = open("TP3\inv.out", "w")
+    global shortage_cost, minlag, maxlag, prob_distrib_demand, smalls, bigs, next_event_type
     
     # Especifico numero de eventos
     num_events = 4
@@ -72,6 +68,7 @@ def main():
 
     # Ejecuta la simulación variando la política de inventario
     for i in range(num_policies):
+        
         # Lee la política de inventario y inicializa la simulación
         smalls, bigs = policies[i]
         initialize()
@@ -93,8 +90,10 @@ def main():
                 report()
 
 def initialize():
-    global sim_time, inv_level, time_last_event, total_ordering_cost, area_holding, area_shortage, time_next_event
+    global sim_time, inv_level, time_last_event, total_ordering_cost, area_holding, area_shortage, time_next_event, next_event_type
 
+    next_event_type = 0
+    
     # Inicializa el reloj de la simulación
     sim_time = 0.0
 
@@ -112,28 +111,28 @@ def initialize():
     time_next_event[2] = sim_time + expon(mean_interdemand)
     time_next_event[3] = num_months
     time_next_event[4] = 0.0
-    
+
 def timing():
     global next_event_type, sim_time
     
     min_time_next_event = 1.0e+29
     next_event_type = 0
-    
+
     # Determino el tipo del proximo evento.
     for i in range(1, num_events+1):
         if time_next_event[i] < min_time_next_event:
             min_time_next_event = time_next_event[i]
             next_event_type = i
-    
+
     # Me fijo si la lista de eventos esta vacia.
     if next_event_type == 0:
         # Lista vacia, termino la simulacion.
         print(f"\nLista de eventos vacia en {sim_time}")
         exit(1)
-    
+
     # Lista no vacia, avanza el reloj de simulacion.
     sim_time = min_time_next_event
-    
+
 def order_arrival():
     global inv_level, time_next_event
 
@@ -142,7 +141,7 @@ def order_arrival():
 
     # Dado que no hay un pedido pendiente, elimina el evento de llegada de pedidos de la consideración
     time_next_event[1] = 1.0e+30
-    
+
 def demand():
     global inv_level, time_next_event
 
