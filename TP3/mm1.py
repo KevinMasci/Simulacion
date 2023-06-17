@@ -23,6 +23,12 @@ tiempo_llegada = [0.0] * (limite_Q + 1) # Tiempo de llegada
 tiempo_ult_ev  = 0.0 # Último tiempo de evento
 tiempo_prox_ev = [0.0] * 3 # Próximos tiempos de eventos
 total_dem = 0.0 # Suma de todas las demoras 
+# denegaciones
+denegaciones = {0: 0, 2: 0, 5: 0, 10: 0, 50: 0}
+# Para graficas
+tiempos = []
+estados_servidor_graf = []
+nro_clientes_q_graf = []
 
 def expon(mean): # Genera un número aleatorio distirbuido exponencialmente 
     return -float(mean) * ln(random.random())
@@ -79,23 +85,24 @@ def timing():
 
 def arrive():
     global nro_clientes_q, estado_servidor, nro_clientes_atendidos, total_dem, tiempo_sim, nro_clientes_sistema, cant_clientes_cola
+    global denegaciones, estados_servidor_graf, nro_clientes_q_graf
     
     # Calculo el proximo arrivo.
     tiempo_prox_ev[1] = tiempo_sim + expon(tasa_prom_llegada)
     
     nro_clientes_sistema.append(nro_clientes_sistema[-1] + 1)
     
+    # Me fijo si existe condicion de desbordado (?).
+    if nro_clientes_q >= limite_Q:
+        # La cola esta desbordada, termino la simulacion
+        print(f"\nDesbordamiento del arreglo array tiempo_llegada en el tiempo {tiempo_sim}")
+        exit(2)
+        
     # Me fijo si el servidor esta ocupado.
     if estado_servidor == BUSY:
         # Servidor ocupado, incremento el numero de clientes en cola.
         nro_clientes_q += 1
         cant_clientes_cola.append(nro_clientes_q)
-        
-        # Me fijo si existe condicion de desbordado (?).
-        if nro_clientes_q > limite_Q:
-            # La cola esta desbordada, termino la simulacion
-            print(f"\nDesbordamiento del arreglo array tiempo_llegada en el tiempo {tiempo_sim}")
-            exit(2)
 
         # Todavia hay espacio en la cola, guardo el tiempo de arrivo al final de tiempo_llegada
         tiempo_llegada[nro_clientes_q] = tiempo_sim
@@ -112,6 +119,16 @@ def arrive():
         
         # Calculo salida del cliente
         tiempo_prox_ev[2] = tiempo_sim + expon(tasa_prom_servicio)
+        
+    # Denegaciones
+    for cola in [0, 2, 5, 10, 50]:
+        if nro_clientes_q > cola:
+            denegaciones[cola] += 1
+
+    # Para graficas
+    tiempos.append(tiempo_sim)
+    estados_servidor_graf.append(estado_servidor)
+    nro_clientes_q_graf.append(nro_clientes_q)
     
 def depart():
     global nro_clientes_q, estado_servidor, tiempo_prox_ev, total_dem, nro_clientes_atendidos, tiempo_llegada, tiempo_sim, nro_clientes_sistema, cant_clientes_cola
@@ -140,6 +157,11 @@ def depart():
         # Muevo los clientes en cola 1 lugar adelante
         for i in range(1, nro_clientes_q+1):
             tiempo_llegada[i] = tiempo_llegada[i+1]
+            
+    # Para graficas
+    tiempos.append(tiempo_sim)
+    estados_servidor_graf.append(estado_servidor)
+    nro_clientes_q_graf.append(nro_clientes_q)
             
 def report():
     # Calcula y escribe estimados de medidas de performance
@@ -173,11 +195,44 @@ def report():
     print("Numero de clientes\tProbabilidad")
     for n, p in probabilidades_n_q.items():
         print(f"\t{n}\t\t{p}")
+        
+    # Probabilidad de denegacion de servicio
+    print("Tamaño de cola\tProbabilidad de denegación")
+    for cola, denegacion in denegaciones.items():
+        prob_denegacion = denegacion / nro_atenciones_req
+        print(f"\t{cola}\t\t{prob_denegacion}")
     
-    # Grafico de barras de las probabilidades de encontrar N clientes en cola.
+    # GRAFICAS
+    # Graficas Probabilidades de encontrar N clientes en cola.
     n = list(probabilidades_n_q.keys())
     valores = list(probabilidades_n_q.values())
     plt.bar(n, valores)
+    plt.title('Probabilidad de encontrar N cliente en cola')
+    plt.show()
+    
+    # Grafica Probabilidades de denegacion de servicio
+    tamanios_cola = list(denegaciones.keys())
+    probabilidades_denegacion = [denegaciones[cola] / nro_atenciones_req for cola in tamanios_cola]
+    plt.bar(tamanios_cola, probabilidades_denegacion)
+    plt.xlabel('Tamaño de la cola')
+    plt.ylabel('Probabilidad de denegación')
+    plt.title('Probabilidad de denegación de servicio por tamaño de cola')
+    plt.show()
+    
+    # Gráfica del estado del servidor en el tiempo
+    plt.step(tiempos, estados_servidor_graf, where='post')
+    plt.title('Estado del servidor en el tiempo')
+    plt.xlabel('Tiempo')
+    plt.ylabel('Estado del servidor')
+    plt.xlim(0, 100)
+    plt.show()
+    
+    # Gráfica de la cantidad de clientes en cola en el tiempo
+    plt.step(tiempos, nro_clientes_q_graf, where='post')
+    plt.title('Cantidad de clientes en cola en el tiempo')
+    plt.xlabel('Tiempo')
+    plt.ylabel('Clientes en cola')
+    plt.xlim(0, 100)
     plt.show()
     
 def update_time_avg_stats():
