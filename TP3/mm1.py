@@ -207,6 +207,8 @@ def report():
     n = list(probabilidades_n_q.keys())
     valores = list(probabilidades_n_q.values())
     plt.bar(n, valores)
+    plt.xlabel('Cantidad de clientes')
+    plt.ylabel('Probabilidad')
     plt.title('Probabilidad de encontrar N cliente en cola')
     plt.show()
     
@@ -233,6 +235,17 @@ def report():
     plt.xlabel('Tiempo')
     plt.ylabel('Clientes en cola')
     plt.xlim(0, 100)
+    plt.show()
+    
+    # Grafica del uso del servidor
+    porcentaje_ocupado = (area_estado_serv / tiempo_sim) * 100
+    porcentaje_ocio = 100 - porcentaje_ocupado
+    porcentajes = [porcentaje_ocupado, porcentaje_ocio]
+    etiquetas = ['Ocupado', 'Ocio']
+    colores = ['lightcoral', 'lightskyblue']
+    plt.pie(porcentajes, labels=etiquetas, colors=colores, autopct='%1.1f%%', startangle=90)
+    plt.title('Porcentaje de uso del servidor')
+    plt.axis('equal')
     plt.show()
     
 def update_time_avg_stats():
