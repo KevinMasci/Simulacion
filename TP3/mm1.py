@@ -255,32 +255,6 @@ def report():
     plt.title('Porcentaje de uso del servidor')
     plt.axis('equal')
     plt.show()
-    
-    # Grafica de tiempos de clientes en el sistema
-    tiempos = np.array(tiempos_en_sistema_graf)
-    num_bins = 10
-    frecuencia, bins = np.histogram(tiempos, bins=num_bins)
-    porcentajes = frecuencia / len(tiempos) * 100
-    suma_porcentajes = np.sum(porcentajes)
-    porcentajes_normalizados = porcentajes / suma_porcentajes * 100
-    plt.bar(bins[:-1], porcentajes_normalizados, width=(bins[1] - bins[0]), align='edge')
-    plt.xlabel('Tiempos en el sistema')
-    plt.ylabel('Porcentaje de clientes')
-    plt.title('Distribución de tiempos en el sistema')
-    plt.show()
-    
-    # Grafica de tiempos de clientes en el servidor
-    tiempos_servidor = np.array(tiempos_en_servicio_graf)
-    num_bins = 10
-    frecuencia, bins = np.histogram(tiempos_servidor, bins=num_bins)
-    porcentajes = frecuencia / len(tiempos_servidor) * 100
-    suma_porcentajes = np.sum(porcentajes)
-    porcentajes_normalizados = porcentajes / suma_porcentajes * 100
-    plt.bar(bins[:-1], porcentajes_normalizados, width=(bins[1] - bins[0]), align='edge')
-    plt.xlabel('Tiempos en el servidor')
-    plt.ylabel('Porcentaje de clientes')
-    plt.title('Distribución de tiempos en el servidor')
-    plt.show()
 
 def update_time_avg_stats():
     global area_q, ult_tiempo_ev, tiempo_sim, nro_clientes_q, area_estado_serv
