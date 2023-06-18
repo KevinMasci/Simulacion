@@ -30,9 +30,6 @@ denegaciones = {0: 0, 2: 0, 5: 0, 10: 0, 50: 0}
 tiempos_graf = []
 estados_servidor_graf = []
 nro_clientes_q_graf = []
-tiempos_en_servicio_graf = []
-tiempos_en_cola_graf = []
-tiempos_en_sistema_graf = []
 
 
 def expon(mean): # Genera un número aleatorio distirbuido exponencialmente 
@@ -136,8 +133,7 @@ def arrive():
     nro_clientes_q_graf.append(nro_clientes_q)
     
 def depart():
-    global nro_clientes_q, estado_servidor, tiempo_prox_ev, total_dem, nro_clientes_atendidos, tiempo_llegada, tiempo_sim, nro_clientes_sistema, cant_clientes_cola, tiempos_en_sistema_graf
-    global tiempos_en_servicio_graf
+    global nro_clientes_q, estado_servidor, tiempo_prox_ev, total_dem, nro_clientes_atendidos, tiempo_llegada, tiempo_sim, nro_clientes_sistema, cant_clientes_cola
     
     nro_clientes_sistema.append(nro_clientes_sistema[-1] - 1)
     
@@ -155,7 +151,6 @@ def depart():
         # Calculo la demora del cliente que entra en servicio y actualizo el acum de demora total.
         delay = tiempo_sim  - tiempo_llegada[1]
         total_dem += delay
-        tiempos_en_servicio_graf.append(delay)
         
         # Incremento el numero de clientes demorados y calculo salida.
         nro_clientes_atendidos += 1
@@ -169,7 +164,6 @@ def depart():
     tiempos_graf.append(tiempo_sim)
     estados_servidor_graf.append(estado_servidor)
     nro_clientes_q_graf.append(nro_clientes_q)
-    tiempos_en_sistema_graf.append(tiempo_sim - tiempo_llegada[1])
             
 def report():
     # Calcula y escribe estimados de medidas de performance
