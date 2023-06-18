@@ -1,6 +1,7 @@
 import random
 from numpy import log as ln
 import matplotlib.pyplot as plt
+import numpy as np
 
 limite_Q = 100 # Límite de longitud de la cola
 BUSY = 1 # Servidor ocupado
@@ -21,14 +22,18 @@ tasa_prom_servicio = 0.5 # Tasa promedio de servicio
 tiempo_sim = 0.0 
 tiempo_llegada = [0.0] * (limite_Q + 1) # Tiempo de llegada
 tiempo_ult_ev  = 0.0 # Último tiempo de evento
-tiempo_prox_ev = [0.0] * 3 # Próximos tiempos de eventos
+tiempo_prox_ev = [0.0] * 3 # Próximos tiempos_graf de eventos
 total_dem = 0.0 # Suma de todas las demoras 
 # denegaciones
 denegaciones = {0: 0, 2: 0, 5: 0, 10: 0, 50: 0}
 # Para graficas
-tiempos = []
+tiempos_graf = []
 estados_servidor_graf = []
 nro_clientes_q_graf = []
+tiempos_en_servicio_graf = []
+tiempos_en_cola_graf = []
+tiempos_en_sistema_graf = []
+
 
 def expon(mean): # Genera un número aleatorio distirbuido exponencialmente 
     return -float(mean) * ln(random.random())
@@ -126,12 +131,13 @@ def arrive():
             denegaciones[cola] += 1
 
     # Para graficas
-    tiempos.append(tiempo_sim)
+    tiempos_graf.append(tiempo_sim)
     estados_servidor_graf.append(estado_servidor)
     nro_clientes_q_graf.append(nro_clientes_q)
     
 def depart():
-    global nro_clientes_q, estado_servidor, tiempo_prox_ev, total_dem, nro_clientes_atendidos, tiempo_llegada, tiempo_sim, nro_clientes_sistema, cant_clientes_cola
+    global nro_clientes_q, estado_servidor, tiempo_prox_ev, total_dem, nro_clientes_atendidos, tiempo_llegada, tiempo_sim, nro_clientes_sistema, cant_clientes_cola, tiempos_en_sistema_graf
+    global tiempos_en_servicio_graf
     
     nro_clientes_sistema.append(nro_clientes_sistema[-1] - 1)
     
@@ -149,6 +155,7 @@ def depart():
         # Calculo la demora del cliente que entra en servicio y actualizo el acum de demora total.
         delay = tiempo_sim  - tiempo_llegada[1]
         total_dem += delay
+        tiempos_en_servicio_graf.append(delay)
         
         # Incremento el numero de clientes demorados y calculo salida.
         nro_clientes_atendidos += 1
@@ -159,9 +166,10 @@ def depart():
             tiempo_llegada[i] = tiempo_llegada[i+1]
             
     # Para graficas
-    tiempos.append(tiempo_sim)
+    tiempos_graf.append(tiempo_sim)
     estados_servidor_graf.append(estado_servidor)
     nro_clientes_q_graf.append(nro_clientes_q)
+    tiempos_en_sistema_graf.append(tiempo_sim - tiempo_llegada[1])
             
 def report():
     # Calcula y escribe estimados de medidas de performance
@@ -222,7 +230,7 @@ def report():
     plt.show()
     
     # Gráfica del estado del servidor en el tiempo
-    plt.step(tiempos, estados_servidor_graf, where='post')
+    plt.step(tiempos_graf, estados_servidor_graf, where='post')
     plt.title('Estado del servidor en el tiempo')
     plt.xlabel('Tiempo')
     plt.ylabel('Estado del servidor')
@@ -230,7 +238,7 @@ def report():
     plt.show()
     
     # Gráfica de la cantidad de clientes en cola en el tiempo
-    plt.step(tiempos, nro_clientes_q_graf, where='post')
+    plt.step(tiempos_graf, nro_clientes_q_graf, where='post')
     plt.title('Cantidad de clientes en cola en el tiempo')
     plt.xlabel('Tiempo')
     plt.ylabel('Clientes en cola')
@@ -248,6 +256,32 @@ def report():
     plt.axis('equal')
     plt.show()
     
+    # Grafica de tiempos de clientes en el sistema
+    tiempos = np.array(tiempos_en_sistema_graf)
+    num_bins = 10
+    frecuencia, bins = np.histogram(tiempos, bins=num_bins)
+    porcentajes = frecuencia / len(tiempos) * 100
+    suma_porcentajes = np.sum(porcentajes)
+    porcentajes_normalizados = porcentajes / suma_porcentajes * 100
+    plt.bar(bins[:-1], porcentajes_normalizados, width=(bins[1] - bins[0]), align='edge')
+    plt.xlabel('Tiempos en el sistema')
+    plt.ylabel('Porcentaje de clientes')
+    plt.title('Distribución de tiempos en el sistema')
+    plt.show()
+    
+    # Grafica de tiempos de clientes en el servidor
+    tiempos_servidor = np.array(tiempos_en_servicio_graf)
+    num_bins = 10
+    frecuencia, bins = np.histogram(tiempos_servidor, bins=num_bins)
+    porcentajes = frecuencia / len(tiempos_servidor) * 100
+    suma_porcentajes = np.sum(porcentajes)
+    porcentajes_normalizados = porcentajes / suma_porcentajes * 100
+    plt.bar(bins[:-1], porcentajes_normalizados, width=(bins[1] - bins[0]), align='edge')
+    plt.xlabel('Tiempos en el servidor')
+    plt.ylabel('Porcentaje de clientes')
+    plt.title('Distribución de tiempos en el servidor')
+    plt.show()
+
 def update_time_avg_stats():
     global area_q, ult_tiempo_ev, tiempo_sim, nro_clientes_q, area_estado_serv
     
