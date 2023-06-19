@@ -1,12 +1,13 @@
 import random
 from numpy import log as ln
 import matplotlib.pyplot as plt
-import numpy as np
+from colorama import Fore, Style
 
-limite_Q = 100 # Límite de longitud de la cola
+limite_Q = 200 # Límite de longitud de la cola
 BUSY = 1 # Servidor ocupado
 IDLE = 0 # Servidor libre
 
+tasas = [[0.25, 1.0], [0.5, 1.0], [0.75, 1.0], [1.0, 1.0], [1.25, 1.0]]
 tipo_prox_evento = None
 nro_clientes_atendidos = 0 # Número de clientes que han sido atendidos
 cant_clientes_cola = [] # Cantidad de clientes en cola en cada t
@@ -18,13 +19,14 @@ estado_servidor = IDLE # B(t)
 area_q = 0.0 # Area bajo Q(t)
 area_estado_serv = 0.0 # Area bajo B(t)
 tasa_prom_llegada = 1.0 # Tasa promedio de llegada
-tasa_prom_servicio = 0.5 # Tasa promedio de servicio
+tasa_prom_servicio = 1.0 # Tasa promedio de servicio
 tiempo_sim = 0.0 
 tiempo_llegada = [0.0] * (limite_Q + 1) # Tiempo de llegada
 tiempo_ult_ev  = 0.0 # Último tiempo de evento
 tiempo_prox_ev = [0.0] * 3 # Próximos tiempos_graf de eventos
 total_dem = 0.0 # Suma de todas las demoras 
 # denegaciones
+total_arrivos = 0
 denegaciones = {0: 0, 2: 0, 5: 0, 10: 0, 50: 0}
 # Para graficas
 tiempos_graf = []
@@ -87,7 +89,7 @@ def timing():
 
 def arrive():
     global nro_clientes_q, estado_servidor, nro_clientes_atendidos, total_dem, tiempo_sim, nro_clientes_sistema, cant_clientes_cola
-    global denegaciones, estados_servidor_graf, nro_clientes_q_graf
+    global denegaciones, estados_servidor_graf, nro_clientes_q_graf, total_arrivos
     
     # Calculo el proximo arrivo.
     tiempo_prox_ev[1] = tiempo_sim + expon(tasa_prom_llegada)
@@ -123,6 +125,7 @@ def arrive():
         tiempo_prox_ev[2] = tiempo_sim + expon(tasa_prom_servicio)
         
     # Denegaciones
+    total_arrivos += 1
     for cola in [0, 2, 5, 10, 50]:
         if nro_clientes_q > cola:
             denegaciones[cola] += 1
@@ -170,26 +173,23 @@ def report():
     
     # Promedio de demora en cola
     prom_demora_cola = total_dem / nro_clientes_atendidos
-    print(f"\nPromedio de demora en cola: {prom_demora_cola:.3f} minutos")
+    print(f"\nPromedio demora en cola: {prom_demora_cola:.3f} minutos")
     
     # Promedio de demora en el sistema
     prom_prom_en_sistema = prom_demora_cola / tasa_prom_servicio
-    print(f"\nPromedio de demora en servicio: {prom_prom_en_sistema:.3f} minutos")
+    print(f"\nPromedio demora en servicio: {prom_prom_en_sistema:.3f} minutos")
     
     # Promedio de numero de clientes en cola
     prom_nro_clientes_q = area_q / tiempo_sim
-    print(f"\nPromedio de numero de clientes en cola: {prom_nro_clientes_q:.3f}")
+    print(f"\nPromedio clientes en cola: {prom_nro_clientes_q:.3f}")
     
     # Promedio de numero de clientes en sistema
     prom_nro_clientes_sistema = sum(nro_clientes_sistema) / len(nro_clientes_sistema)
-    print(f"\nPromedio de numero de clientes en el sistema: {prom_nro_clientes_sistema:.3f}")
+    print(f"\nPromedio clientes en el sistema: {prom_nro_clientes_sistema:.3f}")
     
     # Utilizacion del servidor
     utilizacion_servidor = area_estado_serv / tiempo_sim
     print(f"\nUtilizacion del servidor: {utilizacion_servidor:.3f}")
-    
-    # Tiempo de fin de simulacion
-    print(f"\nTiempo de fin de simulacion: {tiempo_sim:.3f} minutos")
     
     # Probabilidad de encontrar n clientes en cola
     probabilidades_n_q = calc_prob(cant_clientes_cola)
@@ -201,56 +201,58 @@ def report():
     # Probabilidad de denegacion de servicio
     print("Tamaño de cola\tProbabilidad de denegación")
     for cola, denegacion in denegaciones.items():
-        prob_denegacion = denegacion / nro_atenciones_req
+        prob_denegacion = denegacion / total_arrivos
         print(f"\t{cola}\t\t{prob_denegacion}")
     
-    # GRAFICAS
-    # Graficas Probabilidades de encontrar N clientes en cola.
-    n = list(probabilidades_n_q.keys())
-    valores = list(probabilidades_n_q.values())
-    plt.bar(n, valores)
-    plt.xlabel('Cantidad de clientes')
-    plt.ylabel('Probabilidad')
-    plt.title('Probabilidad de encontrar N cliente en cola')
-    plt.show()
-    
-    # Grafica Probabilidades de denegacion de servicio
-    tamanios_cola = list(denegaciones.keys())
-    probabilidades_denegacion = [denegaciones[cola] / nro_atenciones_req for cola in tamanios_cola]
-    plt.bar(tamanios_cola, probabilidades_denegacion)
-    plt.xlabel('Tamaño de la cola')
-    plt.ylabel('Probabilidad de denegación')
-    plt.title('Probabilidad de denegación de servicio por tamaño de cola')
-    plt.show()
-    
-    # Gráfica del estado del servidor en el tiempo
-    plt.step(tiempos_graf, estados_servidor_graf, where='post')
-    plt.title('Estado del servidor en el tiempo')
-    plt.xlabel('Tiempo')
-    plt.ylabel('Estado del servidor')
-    plt.xlim(0, 100)
-    plt.show()
-    
-    # Gráfica de la cantidad de clientes en cola en el tiempo
-    plt.step(tiempos_graf, nro_clientes_q_graf, where='post')
-    plt.axhline(prom_nro_clientes_q, color='red', linestyle='-', label=f'Promedio teorico {prom_nro_clientes_q:.3f}')
-    plt.title('Cantidad de clientes en cola en el tiempo')
-    plt.xlabel('Tiempo')
-    plt.ylabel('Clientes en cola')
-    plt.xlim(0, 100)
-    plt.legend()
-    plt.show()
-    
-    # Grafica del uso del servidor
-    porcentaje_ocupado = (area_estado_serv / tiempo_sim) * 100
-    porcentaje_ocio = 100 - porcentaje_ocupado
-    porcentajes = [porcentaje_ocupado, porcentaje_ocio]
-    etiquetas = ['Ocupado', 'Ocio']
-    colores = ['lightcoral', 'lightskyblue']
-    plt.pie(porcentajes, labels=etiquetas, colors=colores, autopct='%1.1f%%', startangle=90)
-    plt.title('Porcentaje de uso del servidor')
-    plt.axis('equal')
-    plt.show()
+    ## GRAFICAS
+    ## Graficas Probabilidades de encontrar N clientes en cola.
+    #n = list(probabilidades_n_q.keys())
+    #valores = list(probabilidades_n_q.values())
+    #plt.bar(n, valores)
+    #plt.xlabel('Cantidad de clientes')
+    #plt.ylabel('Probabilidad')
+    #plt.title('Probabilidad de encontrar N cliente en cola')
+    #plt.show()
+    #
+    ## Grafica Probabilidades de denegacion de servicio
+    #tamanios_cola = list(denegaciones.keys())
+    #probabilidades_denegacion = [denegaciones[cola] / nro_atenciones_req for cola in tamanios_cola]
+    #plt.bar(tamanios_cola, probabilidades_denegacion)
+    #plt.xlabel('Tamaño de la cola')
+    #plt.ylabel('Probabilidad de denegación')
+    #plt.title('Probabilidad de denegación de servicio por tamaño de cola')
+    #plt.show()
+    #
+    ## Gráfica del estado del servidor en el tiempo
+    #plt.step(tiempos_graf, estados_servidor_graf, where='post')
+    #plt.title('Estado del servidor en el tiempo')
+    #plt.xlabel('Tiempo')
+    #plt.ylabel('Estado del servidor')
+    #plt.xlim(0, 1000)
+    #plt.show()
+    #
+    ## Gráfica de la cantidad de clientes en cola en el tiempo
+    #prom_nro_clientes_q_real = sum(nro_clientes_q_graf) / len(nro_clientes_q_graf)
+    #plt.step(tiempos_graf, nro_clientes_q_graf, where='post')
+    #plt.axhline(prom_nro_clientes_q, color='red', linestyle='-', label=f'Promedio teórico {prom_nro_clientes_q:.3f}')
+    #plt.axhline(prom_nro_clientes_q, color='blue', linestyle='-', label=f'Promedio real {prom_nro_clientes_q_real:.3f}')
+    #plt.title('Cantidad de clientes en cola en el tiempo')
+    #plt.xlabel('Tiempo')
+    #plt.ylabel('Clientes en cola')
+    #plt.xlim(0, 1000)
+    #plt.legend()
+    #plt.show()
+    #
+    ## Grafica del uso del servidor
+    #porcentaje_ocupado = (area_estado_serv / tiempo_sim) * 100
+    #porcentaje_ocio = 100 - porcentaje_ocupado
+    #porcentajes = [porcentaje_ocupado, porcentaje_ocio]
+    #etiquetas = ['Ocupado', 'Ocio']
+    #colores = ['lightcoral', 'lightskyblue']
+    #plt.pie(porcentajes, labels=etiquetas, colors=colores, autopct='%1.1f%%', startangle=90)
+    #plt.title('Porcentaje de uso del servidor')
+    #plt.axis('equal')
+    #plt.show()
 
 def update_time_avg_stats():
     global area_q, ult_tiempo_ev, tiempo_sim, nro_clientes_q, area_estado_serv
@@ -267,21 +269,21 @@ def update_time_avg_stats():
     # Actualizo el area bajo B(t) (estado_servidor)
     area_estado_serv += estado_servidor * time_since_last_event
             
-def main():
+def simulacion():
     global nro_eventos_posibles, tasa_prom_llegada, tasa_prom_servicio, nro_atenciones_req, nro_clientes_sistema
     
     nro_eventos_posibles = 2
     
     # Imprimo los parametros
-    print("Sistema de cola de un solo servidor\n")
-    print(f"Media de tiempo entre arrivos: {tasa_prom_llegada} minutos\n")
-    print(f"Media del tiempo de servicio: {tasa_prom_servicio} minutos\n")
-    print(f"Numero de clientes: {nro_atenciones_req}\n")
+    #print("Sistema de cola de un solo servidor\n")
+    #print(f"Media de tiempo entre arrivos: {tasa_prom_llegada} minutos\n")
+    #print(f"Media del tiempo de servicio: {tasa_prom_servicio} minutos\n")
+    #print(f"Numero de clientes: {nro_atenciones_req}\n")
     
     # Llamo a rutina de inicializacion
     initialize()
-    # Corro la simulacion hasta llegar al limite de Demorados
     
+    # Corro la simulacion hasta llegar al limite de Demorados
     nro_clientes_sistema = [0]
     
     while (int(nro_clientes_atendidos) < int(nro_atenciones_req)):
@@ -298,5 +300,11 @@ def main():
     # Invoco el generador de reporte y termino la simulacion
     report()
     
+def main():
+    for c in range(10):
+        print(Fore.BLUE + f"Corrida {c+1}" + Style.RESET_ALL)
+        simulacion()
+        print("\n")
+
 if __name__ == "__main__":
     main()
