@@ -233,10 +233,12 @@ def report():
     
     # Gráfica de la cantidad de clientes en cola en el tiempo
     plt.step(tiempos_graf, nro_clientes_q_graf, where='post')
+    plt.axhline(prom_nro_clientes_q, color='red', linestyle='-', label=f'Promedio teorico {prom_nro_clientes_q:.3f}')
     plt.title('Cantidad de clientes en cola en el tiempo')
     plt.xlabel('Tiempo')
     plt.ylabel('Clientes en cola')
     plt.xlim(0, 100)
+    plt.legend()
     plt.show()
     
     # Grafica del uso del servidor
