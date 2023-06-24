@@ -10,7 +10,7 @@ limite_Q = 200000 # Límite de longitud de la cola
 BUSY = 1 # Servidor ocupado
 IDLE = 0 # Servidor libre
 
-tasa_prom_llegada = 1.25 # Tasa promedio de llegada
+tasa_prom_llegada = 0.8 # Tasa promedio de llegada
 tasa_prom_servicio = 1.0 # Tasa promedio de servicio
 
 area_estado_serv = 0.0 # Area bajo B(t)
